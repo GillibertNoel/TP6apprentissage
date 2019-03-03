@@ -6,6 +6,7 @@ import numpy as np
 import math
 import scipy
 import utils
+import random
 
 def confusionmatrixcreator(predictedlabels, truelabels):
     confusionmatrix=np.zeros([len(np.unique(truelabels)),len(np.unique(truelabels))],float)
@@ -14,7 +15,7 @@ def confusionmatrixcreator(predictedlabels, truelabels):
     return confusionmatrix
 
 #Separation de donn�es
-total_data, total_labels = utils.load_dataset("data12.csv")
+total_data, total_labels = utils.load_dataset("data2.csv")
 print(len(total_labels))
 
 proportionseparation = 20#pourcentage des données a mettre dans le test.
@@ -25,21 +26,32 @@ labelstrain=total_labels[proportionseparation:100]
 
 for i in range(1,round(len(total_labels)/100)):
     labelteststart=100*i
-    labeltestend=100*i+proportionseparation
     labeltrainend=100*(i+1)
+    labelstemp=total_labels[labelteststart:labeltrainend]
+    datatemp=total_data[labelteststart:labeltrainend]
+    u=list(range(0,100))
+    random.shuffle(u)
+    labeltempfin=[]
+    datatempfin=[]
+    for i in range(0,100):
+        labeltempfin.append(labelstemp[u[i]])
+        datatempfin.append(datatemp[u[i]])
     print(i)
-    labelstest=np.concatenate((labelstest,total_labels[labelteststart:labeltestend]))
-    valeurstest=np.concatenate((valeurstest,total_data[labelteststart:labeltestend]))
-    labelstrain=np.concatenate((labelstrain,total_labels[labeltestend:labeltrainend]))
-    valeurstrain=np.concatenate((valeurstrain,total_data[labeltestend:labeltrainend]))
+    labelstest=np.concatenate((labelstest,labeltempfin[0:proportionseparation]))
+    valeurstest=np.concatenate((valeurstest,datatempfin[0:proportionseparation]))
+    labelstrain=np.concatenate((labelstrain,labeltempfin[proportionseparation:100]))
+    valeurstrain=np.concatenate((valeurstrain,datatempfin[proportionseparation:100]))
 
 
-g = GaussianBayes(priors=None,diag=False)
+g = GaussianBayes(priors=None,diag=True)
 # Apprentissage
 g.fit(valeurstrain, labelstrain)
 
 # Score
 score = g.score(valeurstest, labelstest)
+print("precision : {:.2f}".format(score))
+score = g.score(valeurstrain, labelstrain)
+#sur les donnees d'entrainement j'obtiens usuellement des valeurs dans les alentours de 0.73(0.77 pour le cas diagonal)
 print("precision : {:.2f}".format(score))
 
 neigh = KNeighborsClassifier(n_neighbors=3,weights='uniform', algorithm='brute')

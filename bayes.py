@@ -27,7 +27,7 @@ class GaussianBayes(object):
         n_features = self.mu.shape[1]
 
         # initalize the output vector
-        y = np.zeros(n_obs)
+        y = np.zeros(n_obs,int)
         #L'on parcourt tous les points a clasifier
         for i in range(0,n_obs):
             u=-float('inf') #plus petite valeur de correspondance
